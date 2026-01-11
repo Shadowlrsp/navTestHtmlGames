@@ -1,55 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
 body {
+    margin: 0;
     background: #000;
     color: #fff;
     font-family: 'Orbitron', sans-serif;
     overflow: hidden;
-    touch-action: none;
     user-select: none;
 }
 
 canvas {
+    width: 100vw;
+    height: 100vh;
     display: block;
-    width: 100%;
-    height: 100%;
 }
 
 .ui-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    display: flex;
-    flex-direction: column;
     padding: 1rem;
 }
 
+.interactive,
 #pauseBtn {
     pointer-events: auto;
 }
 
-.interactive {
-    pointer-events: auto;
-}
-
-.neon-text {
-    text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
-}
-
 .btn-neon {
-    background: rgba(0, 243, 255, 0.1);
+    background: rgba(0,243,255,.1);
     border: 2px solid #00f3ff;
-    box-shadow: 0 0 10px #00f3ff;
     color: #00f3ff;
-    transition: 0.2s;
+    box-shadow: 0 0 10px #00f3ff;
     text-transform: uppercase;
 }
 
-.btn-neon:active {
-    background: #00f3ff;
-    color: #000;
+.neon-text {
+    text-shadow: 0 0 10px #00f3ff;
 }
 
 .hidden {
-    display: none !important;
+    display: none;
 }
