@@ -14,36 +14,15 @@
         <div id="hud" class="w-full flex justify-between items-start hidden">
             <div>
                 <div class="text-xl font-bold text-cyan-400">SCORE: <span id="scoreDisplay">0</span></div>
-                <div class="text-sm text-yellow-400">CRISTAUX: <span id="crystalDisplay">0</span></div>
             </div>
-            <div class="w-32 h-4 border-2 border-cyan-500 rounded overflow-hidden">
-                <div id="healthBar" class="h-full bg-cyan-500 w-full"></div>
-            </div>
-        </div>
-
-        <button id="pauseBtn" class="absolute top-4 right-4 btn-neon px-4 py-2 rounded interactive hidden">PAUSE</button>
-
-        <div id="mainMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 interactive">
-            <h1 class="text-6xl font-black mb-2 neon-text text-center">navTestHtmlGames<br>Version de test</h1>
-            <button id="startBtn" class="btn-neon px-12 py-4 rounded-full text-xl font-bold mt-8">JOUER</button>
-        </div>
-
-        <div id="shopMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 interactive hidden">
-            <h2 class="text-3xl font-bold mb-4 text-yellow-400">AMÉLIORATIONS</h2>
-            <div id="upgradeList" class="w-full max-w-md px-4 space-y-2 overflow-y-auto max-h-[60vh]"></div>
-            <div class="flex gap-4 mt-6">
-                <button id="shopBackBtn" class="px-6 py-2 border border-gray-500 text-gray-400 rounded">RETOUR</button>
-                <button id="shopPlayBtn" class="btn-neon px-8 py-2 rounded font-bold">COMBAT</button>
+            <div class="flex flex-col items-end gap-2">
+                <button id="pauseBtn" class="btn-neon px-4 py-1 rounded hidden">PAUSE</button>
             </div>
         </div>
 
-        <div id="gameOverMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-900/30 interactive hidden">
-            <h2 class="text-4xl font-bold mb-2 text-red-500">DÉTRUIT</h2>
-            <p class="text-xl mb-6">SCORE: <span id="finalScore">0</span></p>
-            <div class="flex gap-4">
-                <button id="restartBtn" class="btn-neon px-6 py-3 rounded">RECOMMENCER</button>
-                <button id="goToShopBtn" class="px-6 py-3 border border-yellow-500 text-yellow-500 rounded">SHOP</button>
-            </div>
+        <div id="mainMenu" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 interactive">
+            <h1 class="text-6xl font-black mb-4 neon-text text-center">navTestHtmlGames</h1>
+            <button id="startBtn" class="btn-neon px-12 py-4 rounded-full text-xl font-bold">JOUER</button>
         </div>
     </div>
 
