@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+body {
+    background: #000;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ui-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.interactive {
+    pointer-events: auto;
+}
+
+.neon-text {
+    text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+}
+
+.btn-neon {
+    background: rgba(0, 243, 255, 0.1);
+    border: 2px solid #00f3ff;
+    box-shadow: 0 0 10px #00f3ff;
+    color: #00f3ff;
+    transition: 0.2s;
+    text-transform: uppercase;
+}
+
+.btn-neon:active {
+    background: #00f3ff;
+    color: #000;
+}
+
+.upgrade-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #333;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.shake {
+    animation: shake 0.4s;
+}
+
+@keyframes shake {
+    0%,100% { transform: translate(0,0); }
+    25% { transform: translate(-4px,4px); }
+    50% { transform: translate(4px,-4px); }
+    75% { transform: translate(-4px,-4px); }
+}
