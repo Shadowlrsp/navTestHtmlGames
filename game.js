@@ -1,17 +1,17 @@
 const canvas=document.getElementById('gameCanvas')
 const ctx=canvas.getContext('2d')
 
-const STATE={MENU:0,PLAYING:1,GAMEOVER:2,SHOP:3}
-let currentState=STATE.MENU,width,height,frames=0,score=0,crystals=0,difficulty=1
-let player,bullets=[],enemies=[],particles=[],loot=[],stars=[]
-let paused=false
+const STATE={MENU:0,PLAYING:1,GAMEOVER:2}
+let currentState=STATE.MENU
+let width,height,frames=0,score=0
+let player,paused=false
 
 const input={x:0,y:0,active:false}
-const playerStats={maxHp:100,damage:10,fireRate:15,speed:0.18,spread:1}
 
 const pauseBtn=document.getElementById('pauseBtn')
 
-pauseBtn.onclick=()=>{
+pauseBtn.onclick=e=>{
+    e.stopPropagation()
     paused=!paused
     pauseBtn.innerText=paused?'REPRENDRE':'PAUSE'
 }
@@ -25,22 +25,12 @@ class Player{
     constructor(){
         this.x=width/2
         this.y=height-100
-        this.hp=playerStats.maxHp
-        this.lastShot=0
-        this.inv=0
     }
     update(){
         if(input.active){
-            this.x+=(input.x-this.x)*playerStats.speed
-            this.y+=(input.y-60-this.y)*playerStats.speed
+            this.x+=(input.x-this.x)*0.18
+            this.y+=(input.y-60-this.y)*0.18
         }
-        this.x=Math.max(20,Math.min(width-20,this.x))
-        this.y=Math.max(20,Math.min(height-20,this.y))
-        if(frames-this.lastShot>=playerStats.fireRate){
-            this.lastShot=frames
-            bullets.push({x:this.x,y:this.y-20,v:-12,o:'p'})
-        }
-        if(this.inv>0) this.inv--
     }
     draw(){
         ctx.strokeStyle='#00f3ff'
@@ -57,27 +47,19 @@ class Player{
 
 function startGame(){
     player=new Player()
-    bullets=[]
-    enemies=[]
-    loot=[]
-    particles=[]
-    score=0
-    difficulty=1
-    frames=0
     paused=false
+    frames=0
     pauseBtn.innerText='PAUSE'
     pauseBtn.classList.remove('hidden')
     currentState=STATE.PLAYING
     document.getElementById('mainMenu').classList.add('hidden')
     document.getElementById('gameOverMenu').classList.add('hidden')
-    document.getElementById('shopMenu').classList.add('hidden')
     document.getElementById('hud').classList.remove('hidden')
 }
 
 function gameOver(){
     currentState=STATE.GAMEOVER
     pauseBtn.classList.add('hidden')
-    document.getElementById('finalScore').innerText=score
     document.getElementById('hud').classList.add('hidden')
     document.getElementById('gameOverMenu').classList.remove('hidden')
 }
@@ -96,7 +78,23 @@ function loop(){
 window.onload=()=>{
     resize()
     window.addEventListener('resize',resize)
+
+    const setIn=e=>{
+        input.active=true
+        input.x=e.clientX||e.touches[0].clientX
+        input.y=e.clientY||e.touches[0].clientY
+    }
+
+    canvas.addEventListener('mousedown',setIn)
+    canvas.addEventListener('mousemove',e=>input.active&&setIn(e))
+    canvas.addEventListener('mouseup',()=>input.active=false)
+
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();setIn(e)},{passive:false})
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();input.active&&setIn(e)},{passive:false})
+    canvas.addEventListener('touchend',()=>input.active=false)
+
     document.getElementById('startBtn').onclick=startGame
     document.getElementById('restartBtn').onclick=startGame
+
     loop()
 }
