@@ -1,32 +1,15 @@
-e<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>navTestHtmlGames</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        body { background: #000; color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; touch-action: none; user-select: none; }
-        canvas { display: block; width: 100%; height: 100%; }
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; padding: 1rem; }
-        .interactive { pointer-events: auto; }
-        .neon-text { text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff; }
-        .btn-neon { background: rgba(0, 243, 255, 0.1); border: 2px solid #00f3ff; box-shadow: 0 0 10px #00f3ff; color: #00f3ff; transition: 0.2s; text-transform: uppercase; }
-        .btn-neon:active { background: #00f3ff; color: #000; }
-        .upgrade-card { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake {
-            0%, 100% { transform: translate(0,0); }
-            25% { transform: translate(-4px, 4px); }
-            50% { transform: translate(4px, -4px); }
-            75% { transform: translate(-4px, -4px); }
-        }
-        .hidden { display: none !important; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+
     <div class="ui-layer">
         <div id="hud" class="w-full flex justify-between items-start hidden">
             <div>
@@ -34,13 +17,17 @@ e<!DOCTYPE html>
                 <div class="text-sm text-yellow-400">CRISTAUX: <span id="crystalDisplay">0</span></div>
             </div>
             <div class="w-32 h-4 border-2 border-cyan-500 rounded overflow-hidden">
-                <div id="healthBar" class="h-full bg-cyan-500 w-full transition-all"></div>
+                <div id="healthBar" class="h-full bg-cyan-500 w-full"></div>
             </div>
         </div>
+
+        <button id="pauseBtn" class="absolute top-4 right-4 btn-neon px-4 py-2 rounded interactive hidden">PAUSE</button>
+
         <div id="mainMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 interactive">
             <h1 class="text-6xl font-black mb-2 neon-text text-center">navTestHtmlGames<br>Version de test</h1>
             <button id="startBtn" class="btn-neon px-12 py-4 rounded-full text-xl font-bold mt-8">JOUER</button>
         </div>
+
         <div id="shopMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 interactive hidden">
             <h2 class="text-3xl font-bold mb-4 text-yellow-400">AMÉLIORATIONS</h2>
             <div id="upgradeList" class="w-full max-w-md px-4 space-y-2 overflow-y-auto max-h-[60vh]"></div>
@@ -49,175 +36,17 @@ e<!DOCTYPE html>
                 <button id="shopPlayBtn" class="btn-neon px-8 py-2 rounded font-bold">COMBAT</button>
             </div>
         </div>
+
         <div id="gameOverMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-900/30 interactive hidden">
             <h2 class="text-4xl font-bold mb-2 text-red-500">DÉTRUIT</h2>
             <p class="text-xl mb-6">SCORE: <span id="finalScore">0</span></p>
             <div class="flex gap-4">
-                <button id="restartBtn" class="btn-neon px-6 py-3 rounded">RECOMENCER</button>
+                <button id="restartBtn" class="btn-neon px-6 py-3 rounded">RECOMMENCER</button>
                 <button id="goToShopBtn" class="px-6 py-3 border border-yellow-500 text-yellow-500 rounded">SHOP</button>
             </div>
         </div>
     </div>
-<script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const STATE = { MENU: 0, PLAYING: 1, GAMEOVER: 2, SHOP: 3 };
-let currentState = STATE.MENU, width, height, frames = 0, score = 0, crystals = 0, difficulty = 1;
-let player, bullets = [], enemies = [], particles = [], loot = [], stars = [];
-const input = { x: 0, y: 0, active: false };
-const playerStats = { maxHp: 100, damage: 10, fireRate: 15, speed: 0.18, spread: 1 };
-const upgrades = [
-    { id: 'dmg', name: 'DÉGÂTS', cost: 50, lvl: 1, max: 10, apply: () => playerStats.damage += 5 },
-    { id: 'rate', name: 'CADENCE', cost: 75, lvl: 1, max: 8, apply: () => playerStats.fireRate = Math.max(4, playerStats.fireRate - 1.5) },
-    { id: 'hp', name: 'COQUE', cost: 60, lvl: 1, max: 10, apply: () => { playerStats.maxHp += 30; if(player) player.hp = playerStats.maxHp; } },
-    { id: 'spd', name: 'MULTI-TIR', cost: 250, lvl: 1, max: 5, apply: () => playerStats.spread++ }
-];
-const AudioSys = {
-    ctx: null,
-    init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    play(f, t, d, v=0.1) {
-        if(!this.ctx) return;
-        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-        g.gain.setValueAtTime(v, this.ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + d);
-        o.connect(g); g.connect(this.ctx.destination);
-        o.start(); o.stop(this.ctx.currentTime + d);
-    }
-};
-class Star {
-    constructor() { this.reset(); this.y = Math.random() * height; }
-    reset() { this.x = Math.random() * width; this.y = 0; this.s = Math.random() * 2; this.v = Math.random() * 2 + 1; }
-    update() { this.y += this.v * (currentState === STATE.PLAYING ? 2 : 0.5); if(this.y > height) this.reset(); }
-    draw() { ctx.fillStyle = '#fff'; ctx.fillRect(this.x, this.y, this.s, this.s); }
-}
-class Player {
-    constructor() { this.x = width/2; this.y = height-100; this.hp = playerStats.maxHp; this.lastShot = 0; this.inv = 0; }
-    update() {
-        if(input.active) { this.x += (input.x - this.x) * playerStats.speed; this.y += (input.y - 60 - this.y) * playerStats.speed; }
-        this.x = Math.max(20, Math.min(width-20, this.x));
-        this.y = Math.max(20, Math.min(height-20, this.y));
-        if(frames - this.lastShot >= playerStats.fireRate) { this.shoot(); this.lastShot = frames; }
-        if(this.inv > 0) this.inv--;
-    }
-    shoot() {
-        AudioSys.play(600, 'square', 0.1, 0.03);
-        const s = playerStats.spread;
-        for(let i=0; i<s; i++) bullets.push(new Bullet(this.x + (i - (s-1)/2)*15, this.y-20, -12, 'p'));
-    }
-    draw() {
-        if(this.inv > 0 && Math.floor(frames/5)%2) return;
-        ctx.save(); ctx.translate(this.x, this.y);
-        ctx.shadowBlur = 15; ctx.shadowColor = '#00f3ff'; ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(0,-20); ctx.lineTo(15,15); ctx.lineTo(0,5); ctx.lineTo(-15,15); ctx.closePath(); ctx.stroke();
-        ctx.restore();
-    }
-    damage(a) { if(this.inv > 0) return; this.hp -= a; this.inv = 40; updateHUD(); if(this.hp <= 0) { explode(this.x, this.y, 40, '#00f3ff'); AudioSys.play(100, 'sawtooth', 0.5, 0.2); gameOver(); } document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400); }
-}
-class Bullet {
-    constructor(x, y, v, o) { this.x = x; this.y = y; this.v = v; this.o = o; this.dead = false; }
-    update() { this.y += this.v; if(this.y < -20 || this.y > height + 20) this.dead = true; }
-    draw() { ctx.fillStyle = this.o === 'p' ? '#00f3ff' : '#ff0055'; ctx.fillRect(this.x-2, this.y-6, 4, 12); }
-}
-class Enemy {
-    constructor() {
-        this.x = Math.random() * (width-40) + 20; this.y = -40; this.dead = false;
-        const r = Math.random();
-        if(r < 0.7) { this.hp = 20*difficulty; this.v = 2.5; this.c = '#ff0055'; this.s = 100; this.w = 25; }
-        else if(r < 0.9) { this.hp = 10*difficulty; this.v = 5; this.c = '#aa00ff'; this.s = 150; this.w = 15; }
-        else { this.hp = 60*difficulty; this.v = 1.2; this.c = '#ffaa00'; this.s = 300; this.w = 40; }
-    }
-    update() { this.y += this.v; if(frames%70 === 0 && Math.random() > 0.6) bullets.push(new Bullet(this.x, this.y+20, 6, 'e')); if(this.y > height+40) this.dead = true; }
-    draw() { ctx.strokeStyle = this.c; ctx.lineWidth = 2; ctx.strokeRect(this.x - this.w/2, this.y - this.w/2, this.w, this.w); }
-}
-class Particle {
-    constructor(x, y, c) { this.x = x; this.y = y; this.vx = (Math.random()-0.5)*10; this.vy = (Math.random()-0.5)*10; this.l = 1; this.c = c; }
-    update() { this.x += this.vx; this.y += this.vy; this.l -= 0.03; }
-    draw() { ctx.globalAlpha = this.l; ctx.fillStyle = this.c; ctx.fillRect(this.x, this.y, 3, 3); ctx.globalAlpha = 1; }
-}
-class Gem {
-    constructor(x, y) { this.x = x; this.y = y; this.dead = false; }
-    update() {
-        this.y += 2; const d = Math.hypot(this.x - player.x, this.y - player.y);
-        if(d < 120) { this.x += (player.x - this.x)*0.1; this.y += (player.y - this.y)*0.1; }
-        if(d < 25) { crystals += 5; AudioSys.play(1000, 'sine', 0.1, 0.05); this.dead = true; updateHUD(); }
-        if(this.y > height) this.dead = true;
-    }
-    draw() { ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(this.x, this.y, 4, 0, 7); ctx.fill(); }
-}
-function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-function explode(x, y, n, c) { for(let i=0; i<n; i++) particles.push(new Particle(x, y, c)); }
-function updateHUD() {
-    document.getElementById('scoreDisplay').innerText = score;
-    document.getElementById('crystalDisplay').innerText = crystals;
-    document.getElementById('healthBar').style.width = Math.max(0, (player.hp/playerStats.maxHp)*100) + '%';
-}
-function startGame() {
-    player = new Player(); bullets = []; enemies = []; loot = []; score = 0; difficulty = 1; frames = 0;
-    currentState = STATE.PLAYING;
-    ['mainMenu', 'gameOverMenu', 'shopMenu'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById('hud').classList.remove('hidden');
-    updateHUD();
-}
-function gameOver() {
-    currentState = STATE.GAMEOVER;
-    document.getElementById('finalScore').innerText = score;
-    setTimeout(() => { document.getElementById('hud').classList.add('hidden'); document.getElementById('gameOverMenu').classList.remove('hidden'); }, 1000);
-}
-function renderShop() {
-    const container = document.getElementById('upgradeList'); container.innerHTML = '';
-    upgrades.forEach(u => {
-        const cost = Math.floor(u.cost * Math.pow(1.6, u.lvl-1));
-        const div = document.createElement('div');
-        div.className = `upgrade-card p-3 rounded flex justify-between items-center ${crystals >= cost && u.lvl <= u.max ? 'border-cyan-500 interactive' : 'opacity-50'}`;
-        div.innerHTML = `<div><div class="font-bold">${u.name} (Lvl ${u.lvl > u.max ? 'MAX' : u.lvl})</div></div><button class="bg-cyan-900 px-4 py-1 rounded text-yellow-400 font-bold">${u.lvl > u.max ? 'MAX' : cost + ' 💎'}</button>`;
-        if(crystals >= cost && u.lvl <= u.max) div.onclick = () => { crystals -= cost; u.lvl++; u.apply(); AudioSys.play(800, 'sine', 0.2); renderShop(); updateHUD(); };
-        container.appendChild(div);
-    });
-}
-function loop() {
-    ctx.fillStyle = '#000'; ctx.fillRect(0,0,width,height);
-    stars.forEach(s => { s.update(); s.draw(); });
-    if(currentState === STATE.PLAYING) {
-        frames++; if(frames % 600 === 0) difficulty += 0.2;
-        if(frames % Math.floor(Math.max(20, 80 - difficulty*5)) === 0) enemies.push(new Enemy());
-        player.update(); player.draw();
-        bullets.forEach(b => {
-            b.update(); b.draw();
-            if(b.o === 'p') {
-                enemies.forEach(e => {
-                    if(!b.dead && !e.dead && Math.hypot(b.x - e.x, b.y - e.y) < e.w) {
-                        b.dead = true; e.hp -= playerStats.damage; AudioSys.play(200, 'square', 0.05, 0.02);
-                        if(e.hp <= 0) { e.dead = true; score += e.s; explode(e.x, e.y, 10, e.c); if(Math.random() > 0.6) loot.push(new Gem(e.x, e.y)); }
-                    }
-                });
-            } else if(Math.hypot(b.x - player.x, b.y - player.y) < 20) { b.dead = true; player.damage(10); }
-        });
-        enemies.forEach(e => { e.update(); e.draw(); if(Math.hypot(e.x - player.x, e.y - player.y) < e.w + 10) { e.dead = true; player.damage(25); explode(e.x, e.y, 10, e.c); } });
-        loot.forEach(l => { l.update(); l.draw(); });
-        bullets = bullets.filter(b => !b.dead); enemies = enemies.filter(e => !e.dead); loot = loot.filter(l => !l.dead);
-    }
-    particles.forEach(p => { p.update(); p.draw(); });
-    particles = particles.filter(p => p.l > 0);
-    requestAnimationFrame(loop);
-}
-window.onload = () => {
-    resize(); window.addEventListener('resize', resize);
-    for(let i=0; i<60; i++) stars.push(new Star());
-    const setIn = (e) => { input.active = true; input.x = (e.clientX || e.touches[0].clientX); input.y = (e.clientY || e.touches[0].clientY); };
-    canvas.addEventListener('mousedown', setIn); canvas.addEventListener('touchstart', (e) => { e.preventDefault(); setIn(e); }, {passive:false});
-    canvas.addEventListener('mousemove', (e) => { if(input.active) setIn(e); });
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(input.active) setIn(e); }, {passive:false});
-    canvas.addEventListener('mouseup', () => input.active = false); canvas.addEventListener('touchend', () => input.active = false);
-    document.getElementById('startBtn').onclick = () => { AudioSys.init(); startGame(); };
-    document.getElementById('restartBtn').onclick = startGame;
-    document.getElementById('goToShopBtn').onclick = () => { document.getElementById('gameOverMenu').classList.add('hidden'); document.getElementById('shopMenu').classList.remove('hidden'); renderShop(); };
-    document.getElementById('shopBackBtn').onclick = () => { document.getElementById('shopMenu').classList.add('hidden'); document.getElementById('mainMenu').classList.remove('hidden'); };
-    document.getElementById('shopPlayBtn').onclick = startGame;
-    loop();
-};
-</script>
+
+    <script src="game.js"></script>
 </body>
 </html>
-
-
