@@ -1,44 +1,50 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-body {
-    margin: 0;
-    background: #000;
-    color: #fff;
-    font-family: 'Orbitron', sans-serif;
-    overflow: hidden;
-    user-select: none;
+body{
+margin:0;
+background:#000;
+color:#fff;
+font-family:'Orbitron',sans-serif;
+overflow:hidden;
+user-select:none;
+touch-action:none;
 }
 
-canvas {
-    width: 100vw;
-    height: 100vh;
-    display: block;
+canvas{
+width:100vw;
+height:100vh;
+display:block;
 }
 
-.ui-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    padding: 1rem;
+.ui-layer{
+position:absolute;
+inset:0;
+pointer-events:none;
+padding:1rem;
 }
 
-.interactive,
-#pauseBtn {
-    pointer-events: auto;
+.interactive,#pauseBtn{
+pointer-events:auto;
 }
 
-.btn-neon {
-    background: rgba(0,243,255,.1);
-    border: 2px solid #00f3ff;
-    color: #00f3ff;
-    box-shadow: 0 0 10px #00f3ff;
-    text-transform: uppercase;
+.neon-text{
+text-shadow:0 0 10px #00f3ff,0 0 20px #00f3ff;
 }
 
-.neon-text {
-    text-shadow: 0 0 10px #00f3ff;
+.btn-neon{
+background:rgba(0,243,255,.1);
+border:2px solid #00f3ff;
+box-shadow:0 0 10px #00f3ff;
+color:#00f3ff;
+text-transform:uppercase;
+transition:.2s;
 }
 
-.hidden {
-    display: none;
+.btn-neon:active{
+background:#00f3ff;
+color:#000;
+}
+
+.hidden{
+display:none;
 }
