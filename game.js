@@ -1,14 +1,12 @@
-const canvas=document.getElementById('gameCanvas')
-const ctx=canvas.getContext('2d')
+const canvas = document.getElementById('gameCanvas')
+const ctx = canvas.getContext('2d')
 
-const STATE={MENU:0,PLAYING:1,GAMEOVER:2}
-let currentState=STATE.MENU
-let width,height,frames=0,score=0
-let player,paused=false
-
-const input={x:0,y:0,active:false}
+let w,h,frames=0,score=0,paused=false
+let bullets=[],enemies=[]
+let player
 
 const pauseBtn=document.getElementById('pauseBtn')
+const scoreDisplay=document.getElementById('scoreDisplay')
 
 pauseBtn.onclick=e=>{
     e.stopPropagation()
@@ -17,20 +15,17 @@ pauseBtn.onclick=e=>{
 }
 
 function resize(){
-    width=canvas.width=window.innerWidth
-    height=canvas.height=window.innerHeight
+    w=canvas.width=window.innerWidth
+    h=canvas.height=window.innerHeight
 }
 
 class Player{
     constructor(){
-        this.x=width/2
-        this.y=height-100
+        this.x=w/2
+        this.y=h-80
     }
     update(){
-        if(input.active){
-            this.x+=(input.x-this.x)*0.18
-            this.y+=(input.y-60-this.y)*0.18
-        }
+        if(frames%15===0) bullets.push({x:this.x,y:this.y})
     }
     draw(){
         ctx.strokeStyle='#00f3ff'
@@ -45,56 +40,70 @@ class Player{
     }
 }
 
-function startGame(){
-    player=new Player()
-    paused=false
-    frames=0
-    pauseBtn.innerText='PAUSE'
-    pauseBtn.classList.remove('hidden')
-    currentState=STATE.PLAYING
-    document.getElementById('mainMenu').classList.add('hidden')
-    document.getElementById('gameOverMenu').classList.add('hidden')
-    document.getElementById('hud').classList.remove('hidden')
-}
-
-function gameOver(){
-    currentState=STATE.GAMEOVER
-    pauseBtn.classList.add('hidden')
-    document.getElementById('hud').classList.add('hidden')
-    document.getElementById('gameOverMenu').classList.remove('hidden')
+function spawnEnemy(){
+    enemies.push({x:Math.random()*w,y:-20})
 }
 
 function loop(){
     ctx.fillStyle='#000'
-    ctx.fillRect(0,0,width,height)
-    if(currentState===STATE.PLAYING && !paused){
+    ctx.fillRect(0,0,w,h)
+
+    if(!paused){
         frames++
+
+        if(frames%60===0) spawnEnemy()
+
+        bullets.forEach(b=>b.y-=10)
+        enemies.forEach(e=>e.y+=3)
+
+        bullets=bullets.filter(b=>b.y>-20)
+        enemies=enemies.filter(e=>e.y<h+20)
+
+        bullets.forEach(b=>{
+            enemies.forEach(e=>{
+                if(Math.hypot(b.x-e.x,b.y-e.y)<20){
+                    e.hit=true
+                    b.hit=true
+                    score+=100
+                    scoreDisplay.innerText=score
+                }
+            })
+        })
+
+        bullets=bullets.filter(b=>!b.hit)
+        enemies=enemies.filter(e=>!e.hit)
+
         player.update()
-        player.draw()
     }
+
+    player.draw()
+
+    ctx.fillStyle='#00f3ff'
+    bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-10,4,10))
+
+    ctx.strokeStyle='#ff0055'
+    enemies.forEach(e=>ctx.strokeRect(e.x-15,e.y-15,30,30))
+
     requestAnimationFrame(loop)
+}
+
+function startGame(){
+    bullets=[]
+    enemies=[]
+    score=0
+    frames=0
+    paused=false
+    pauseBtn.innerText='PAUSE'
+    pauseBtn.classList.remove('hidden')
+    document.getElementById('hud').classList.remove('hidden')
+    document.getElementById('mainMenu').classList.add('hidden')
+    scoreDisplay.innerText=0
+    player=new Player()
 }
 
 window.onload=()=>{
     resize()
     window.addEventListener('resize',resize)
-
-    const setIn=e=>{
-        input.active=true
-        input.x=e.clientX||e.touches[0].clientX
-        input.y=e.clientY||e.touches[0].clientY
-    }
-
-    canvas.addEventListener('mousedown',setIn)
-    canvas.addEventListener('mousemove',e=>input.active&&setIn(e))
-    canvas.addEventListener('mouseup',()=>input.active=false)
-
-    canvas.addEventListener('touchstart',e=>{e.preventDefault();setIn(e)},{passive:false})
-    canvas.addEventListener('touchmove',e=>{e.preventDefault();input.active&&setIn(e)},{passive:false})
-    canvas.addEventListener('touchend',()=>input.active=false)
-
     document.getElementById('startBtn').onclick=startGame
-    document.getElementById('restartBtn').onclick=startGame
-
     loop()
 }
