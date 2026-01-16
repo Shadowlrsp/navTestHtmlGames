@@ -19,7 +19,7 @@ Le projet est un terrain d’expérimentation pour un futur **shoot’em up spat
 - Architecture HTML / CSS / JS
 
 **Lancement du jeu**
-Ouvrir ceci dans votre naviagteur : 
+Ouvrir ceci dans votre navigateur : 
 ```bash
 https://nav-test-html-games.vercel.app/
 
