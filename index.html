@@ -16,12 +16,13 @@
             <div class="text-xl font-bold text-cyan-400">SCORE: <span id="scoreDisplay">0</span></div>
             <div class="text-sm text-yellow-400">CRISTAUX: <span id="crystalDisplay">0</span></div>
         </div>
-        <div id="bossHud" class="hidden flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2 w-64">
-            <span class="text-xs font-bold text-red-500 tracking-widest">ALERTE : BOSS</span>
-            <div class="w-full h-2 border border-red-500 bg-red-950/50 rounded overflow-hidden">
-                <div id="bossHealthBar" class="h-full bg-red-600 w-full transition-all duration-75"></div>
-            </div>
-        </div>
+        <div id="bossHud" class="hidden flex flex-col items-center gap-1 absolute left-1/2 -translate-x-1/2 w-48 md:w-64">
+    <span class="text-[10px] md:text-xs font-bold text-red-500 tracking-widest text-center">ALERTE : BOSS</span>
+    <div class="w-full h-1.5 md:h-2 border border-red-500 bg-red-950/50 rounded overflow-hidden">
+        <div id="bossHealthBar" class="h-full bg-red-600 w-full transition-all duration-75"></div>
+    </div>
+</div>
+
         <div class="flex flex-col items-end gap-2">
             <div class="w-32 h-4 border-2 border-cyan-500 rounded overflow-hidden">
                 <div id="healthBar" class="h-full bg-cyan-500 w-full"></div>
