@@ -7,57 +7,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<canvas id="gameCanvas"></canvas>
+<body class="bg-[#050510] overflow-hidden select-none">
+<canvas id="gameCanvas" class="fixed inset-0 w-full h-full block"></canvas>
 
-<div class="ui-layer">
-    <div id="hud" class="w-full flex justify-between items-start hidden p-4">
-        <div class="flex flex-col gap-2">
-            <div>
-                <div class="text-xl font-bold text-cyan-400">SCORE: <span id="scoreDisplay">0</span></div>
-                <div class="text-sm text-yellow-400">CRISTAUX: <span id="crystalDisplay">0</span></div>
-            </div>
-            
-            <div id="bossHud" class="hidden flex flex-col items-start gap-1 w-40 md:w-48">
-                <span class="text-[10px] md:text-xs font-bold text-red-500 tracking-widest">ALERTE : BOSS</span>
-                <div class="w-full h-1.5 border border-red-500 bg-red-950/50 rounded overflow-hidden">
-                    <div id="bossHealthBar" class="h-full bg-red-600 w-full transition-all duration-75"></div>
-                </div>
-            </div>
+<div id="hud" class="fixed top-0 left-0 w-full z-40 flex justify-between items-start hidden p-4">
+    <div class="flex flex-col gap-2">
+        <div>
+            <div class="text-xl font-bold text-cyan-400">SCORE: <span id="scoreDisplay">0</span></div>
+            <div class="text-sm text-yellow-400">CRISTAUX: <span id="crystalDisplay">0</span></div>
         </div>
         
-        <div class="flex flex-col items-end gap-2">
-            <div class="w-32 h-4 border-2 border-cyan-500 rounded overflow-hidden">
-                <div id="healthBar" class="h-full bg-cyan-500 w-full"></div>
+        <div id="bossHud" class="hidden flex flex-col items-start gap-1 w-40 md:w-48">
+            <span class="text-[10px] md:text-xs font-bold text-red-500 tracking-widest">ALERTE : BOSS</span>
+            <div class="w-full h-1.5 border border-red-500 bg-red-950/50 rounded overflow-hidden">
+                <div id="bossHealthBar" class="h-full bg-red-600 w-full transition-all duration-75"></div>
             </div>
-            <button id="pauseBtn" class="btn-neon px-4 py-1 rounded hidden">PAUSE</button>
         </div>
     </div>
-
-    <div id="mainMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 interactive">
-        <h1 class="text-6xl font-black mb-4 neon-text text-center">navTestHtmlGames</h1>
-        <button id="startBtn" class="btn-neon px-12 py-4 rounded-full text-xl font-bold">JOUER</button>
-    </div>
-
-    <div id="shopMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 interactive hidden">
-        <h2 class="text-3xl font-bold mb-4 text-yellow-400">AMÉLIORATIONS</h2>
-        <div id="upgradeList" class="w-full max-w-md px-4 space-y-2 overflow-y-auto max-h-[60vh]"></div>
-        <button id="shopPlayBtn" class="btn-neon px-8 py-2 rounded font-bold mt-6">REPRENDRE</button>
-    </div>
-
-    <div id="gameOverMenu" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-900/30 interactive hidden">
-        <h2 class="text-4xl font-bold mb-2 text-red-500">DÉTRUIT</h2>
-        <p class="text-xl mb-2">SCORE: <span id="finalScore">0</span></p>
-        <h3 class="text-yellow-400 mb-2">LEADERBOARD</h3>
-        <ul id="leaderboard" class="mb-6 text-sm text-center"></ul>
-        <div class="flex gap-4">
-            <button id="restartBtn" class="btn-neon px-6 py-3 rounded">REJOUER</button>
-            <button id="goShopBtn" class="px-6 py-3 border border-yellow-500 text-yellow-500 rounded">SHOP</button>
+    
+    <div class="flex flex-col items-end gap-2">
+        <div class="w-32 h-4 border-2 border-cyan-500 rounded overflow-hidden">
+            <div id="healthBar" class="h-full bg-cyan-500 w-full"></div>
+        </div>
+        <div class="flex flex-col gap-2 items-end">
+            <button id="quitBtn" class="bg-red-500/20 hover:bg-red-500/40 border border-red-500 text-red-400 px-3 py-1 rounded text-xs font-bold transition-colors">QUITTER</button>
+            <button id="pauseBtn" class="btn-neon px-4 py-1 rounded text-xs">PAUSE</button>
         </div>
     </div>
 </div>
 
-<script src="game.js"></script>
-    
+<div id="mainMenu" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-4">
+    <h1 class="text-4xl md:text-6xl font-black mb-6 neon-text text-center break-words max-w-full">navTestHtmlGames</h1>
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <button id="startBtn" class="btn-neon px-12 py-3 rounded-full text-lg font-bold">JOUER</button>
+        <button id="mainShopBtn" class="px-12 py-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500/20 rounded-full text-lg font-bold transition-colors">BOUTIQUE</button>
+    </div>
+    <div class="flex items-center gap-2 bg-black/50 border border-cyan-500/30 rounded p-1.5 w-64">
+        <input type="password" id="secretInput" placeholder="Un code ?" class="bg-transparent text-xs text-center text-cyan-400 focus:outline-none tracking-widest flex-1">
+        <button id="verifyBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 border border-cyan-500/50 rounded px-3 py-1 text-[10px] font-bold tracking-wider transition-colors">⎆</button>
+    </div>
+</div>
+
+<div id="shopMenu" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 hidden p-4">
+    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-yellow-400">AMÉLIORATIONS</h2>
+    <div id="upgradeList" class="w-full max-w-md px-4 space-y-2 overflow-y-auto max-h-[60vh]"></div>
+    <button id="shopPlayBtn" class="btn-neon px-8 py-2 rounded font-bold mt-6">REPRENDRE</button>
+</div>
+
+<div id="gameOverMenu" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-red-900/30 hidden p-4">
+    <h2 class="text-3xl md:text-4xl font-bold mb-2 text-red-500">DÉTRUIT</h2>
+    <p class="text-lg md:text-xl mb-1">SCORE: <span id="finalScore">0</span></p>
+    <p class="text-md md:text-lg mb-4 text-yellow-400">CRISTAUX: <span id="finalCrystals">0</span></p>
+    <h3 class="text-yellow-400 mb-2 text-sm md:text-base">LEADERBOARD</h3>
+    <ul id="leaderboard" class="mb-6 text-xs md:text-sm text-center"></ul>
+    <div class="flex gap-4">
+        <button id="restartBtn" class="btn-neon px-6 py-3 rounded text-sm md:text-base">JOUER</button>
+        <button id="goShopBtn" class="px-6 py-3 border border-yellow-500 text-yellow-500 rounded text-sm md:text-base">SHOP</button>
+    </div>
+</div>
+
+<script src="game-core.js"></script>
+<script src="game-ui.js"></script>
 </body>
 </html>
