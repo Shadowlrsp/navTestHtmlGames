@@ -166,7 +166,7 @@ function loop() {
         frames++;
         if (frames % 700 === 0) difficulty += .2;
 
-        if (frames % 2400 === 0 && !bossActive) {
+        if (frames % 1800 === 0 && !bossActive) {
             spawnBoss();
         } else {
             let screenScale = Math.max(0.5, 1200 / w);
